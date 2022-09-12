@@ -2,6 +2,8 @@
 
 this package is time.Now with context.Context
 
+and some useful functions for time.Time
+
 ## Usage
 
 ```go
