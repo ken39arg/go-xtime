@@ -64,6 +64,49 @@ func TestTomorrow(t *testing.T) {
 	}
 }
 
+func TestThisWeekday(t *testing.T) {
+	for _, tc := range []struct {
+		in       time.Time
+		wd       time.Weekday
+		expected time.Time
+	}{
+		{
+			in:       time.Date(2022, 1, 2, 3, 4, 5, 6, time.UTC), // sunday
+			wd:       time.Sunday,
+			expected: time.Date(2022, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			in:       time.Date(2022, 1, 2, 3, 4, 5, 6, time.UTC), // sunday
+			wd:       time.Monday,
+			expected: time.Date(2021, 12, 27, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			in:       time.Date(2022, 2, 3, 4, 5, 6, 7, jst), // thursday
+			wd:       time.Sunday,
+			expected: time.Date(2022, 1, 30, 0, 0, 0, 0, jst),
+		},
+		{
+			in:       time.Date(2022, 2, 3, 4, 5, 6, 7, jst), // thursday
+			wd:       time.Monday,
+			expected: time.Date(2022, 1, 31, 0, 0, 0, 0, jst),
+		},
+		{
+			in:       time.Date(2024, 3, 2, 4, 5, 6, 7, pst), // leapday
+			wd:       time.Friday,
+			expected: time.Date(2024, 3, 1, 0, 0, 0, 0, pst),
+		},
+		{
+			in:       time.Date(2024, 3, 2, 4, 5, 6, 7, pst), // leapday
+			wd:       time.Sunday,
+			expected: time.Date(2024, 2, 25, 0, 0, 0, 0, pst),
+		},
+	} {
+		got := ThisWeekday(tc.in, tc.wd)
+		if !got.Equal(tc.expected) {
+			t.Errorf("%s returns different time %s by %s [want: %s]", tc.in, got, tc.wd, tc.expected)
+		}
+	}
+}
 func TestNextWeekday(t *testing.T) {
 	for _, tc := range []struct {
 		in       time.Time
@@ -114,6 +157,31 @@ func TestNextWeekday(t *testing.T) {
 		got := NextWeekday(tc.in, tc.wd)
 		if !got.Equal(tc.expected) {
 			t.Errorf("%s returns different time %s by %s [want: %s]", tc.in, got, tc.wd, tc.expected)
+		}
+	}
+}
+
+func TestBeginningOfMonth(t *testing.T) {
+	for _, tc := range []struct {
+		in       time.Time
+		expected time.Time
+	}{
+		{
+			in:       time.Date(2022, 1, 2, 3, 4, 5, 6, time.UTC),
+			expected: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			in:       time.Date(2022, 2, 3, 4, 5, 6, 7, jst),
+			expected: time.Date(2022, 2, 1, 0, 0, 0, 0, jst),
+		},
+		{
+			in:       time.Date(2024, 2, 29, 4, 5, 6, 7, pst), // leapday
+			expected: time.Date(2024, 2, 1, 0, 0, 0, 0, pst),
+		},
+	} {
+		got := BeginningOfMonth(tc.in)
+		if !got.Equal(tc.expected) {
+			t.Errorf("%s returns different time %s [want: %s]", tc.in, got, tc.expected)
 		}
 	}
 }
